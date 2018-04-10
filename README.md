@@ -5,5 +5,8 @@
 <h4>Dataset: Open University Learning Analytics Dataset </h4>
 <h4>Dataset url: https://analyse.kmi.open.ac.uk/open_dataset </h4>
 <h5>More explanations and details of the python notebook see "OpenLearningAnalytics.md" in Mockups folder https://github.com/florence8627/OUModuleAnalytics/blob/master/Mockups/OpenLearningAnalytics.md. </h5>
-<h5> python script is also included in this repo. </h5>
+
+<h4>Note:</h4>
+<h5> Dataset is not included in this repo. </h5>
+<h5> jupyter notebook and python script are both included in this repo. </h5>
 <h5> Author: Florence Wang </h5>
