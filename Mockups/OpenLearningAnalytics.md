@@ -943,7 +943,7 @@ AGp_pr.head()
 # AGp_pr.to_csv('Module_presentation.csv')
 ```
 
-<h3>6. Visualising variable association -- mosaic plot </h3>
+<h3>6. Visualising categorical variable association -- mosaic plot </h3>
 
 
 ```python
