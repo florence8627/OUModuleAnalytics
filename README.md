@@ -1,4 +1,4 @@
-s# OUModuleAnalytics
+# OUModuleAnalytics
 
 <h3>Visualising factors associated with the completion of an OU module 
 <h4>Platform: Jupyter Python Notebook </h4>
