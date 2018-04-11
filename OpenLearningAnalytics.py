@@ -7,7 +7,7 @@
 
 # <h3>1. Loading data and data inspection</h3>
 
-# In[93]:
+# In[108]:
 
 import pandas as pd
 import math
@@ -19,32 +19,32 @@ df_studentReg.head()
 len(df_studentReg)
 
 
-# In[94]:
+# In[109]:
 
 df_studentInfo = pd.read_csv("studentInfo.csv")
 len(df_studentInfo)
 
 
-# In[95]:
+# In[110]:
 
 df_studentAssessment = pd.read_csv("studentAssessment.csv")
 len(df_studentAssessment)
 
 
-# In[96]:
+# In[111]:
 
 print(df_studentAssessment.columns)
 len(df_studentAssessment.groupby(['id_student']))
 
 
-# In[97]:
+# In[112]:
 
 df_studentVle = pd.read_csv("studentVle.csv")
 df_studentVle.columns
 len(df_studentVle)
 
 
-# In[98]:
+# In[113]:
 
 df_assessment = pd.read_csv("assessments.csv")
 df_vle = pd.read_csv("vle.csv")
@@ -53,24 +53,24 @@ df_course.head()
 len(df_course)
 
 
-# In[99]:
+# In[114]:
 
 df_course.groupby(['code_module','code_presentation'])['code_presentation'].count()
 
 
 # <h3>2. Checking data integrity</h3>
 
-# In[100]:
+# In[115]:
 
 df_studentInfo.groupby(['code_module','code_presentation'])['id_student'].count()
 
 
-# In[101]:
+# In[116]:
 
 df_studentReg.groupby(['code_module','code_presentation'])['id_student'].count()
 
 
-# In[102]:
+# In[117]:
 
 df_studentVle.groupby(['code_module','code_presentation','id_student'])['id_student'].count()[0:25]
 
@@ -80,20 +80,20 @@ df_studentVle.groupby(['code_module','code_presentation','id_student'])['id_stud
 # <h4>3.1 Join Table "StudentInfo" and "StudentRegistration" by "code_module", "code_presentation", "id_student" </h4>
 # <p> Observation: each module have 2-4 code presentations, module CCC 2014J has the highest # of students registered</p>
 
-# In[103]:
+# In[118]:
 
 df_mergedInfoReg = pd.merge(df_studentInfo, df_studentReg, how="left", left_on=['code_module', 'code_presentation','id_student'],
                             right_on=['code_module', 'code_presentation','id_student'])
 df_mergedInfoReg.head()
 
 
-# In[104]:
+# In[119]:
 
 mergedCount=df_mergedInfoReg.groupby(['code_module','code_presentation'])
 mergedCount['id_student'].count()
 
 
-# In[105]:
+# In[120]:
 
 get_ipython().magic('matplotlib inline')
 mergedCount['id_student'].size().plot.barh(title='# of students registered for each module',figsize=[10,10], grid=True,color="lightblue")
@@ -102,7 +102,7 @@ mergedCount['id_student'].size().plot.barh(title='# of students registered for e
 #  <h4>3.2 Join Table "StudentAssessment" and "Assessment" </h4>
 #  <p> Observation: each module / presentation involves multiple assessments, most assessments DO NOT have 100% turn in rate. Module DDD has the most # of assessments 14, Module EEE has the least # of assessments 4 </p>
 
-# In[106]:
+# In[121]:
 
 get_ipython().magic('matplotlib inline')
 df_mergedStuAss = pd.merge(df_studentAssessment, df_assessment, how="left", left_on=['id_assessment'],
@@ -111,7 +111,7 @@ df_mergedStuAss.groupby(['code_module','code_presentation'] ).id_assessment.nuni
     title='# of assessments for each module', figsize=[8,8], grid=True,color="lightblue")
 
 
-# In[107]:
+# In[122]:
 
 ass_count = df_mergedStuAss.groupby(['code_module','code_presentation','id_assessment']).id_assessment.count()
 stu_count = df_mergedInfoReg.groupby(['code_module','code_presentation']).id_student.count()
@@ -122,7 +122,7 @@ ass_count[0:5]/stu_count[0]
 # <h4> 3.3* Merge Table "studentVle" into the merged data frame on studentInfoReg </h4>
 # <p> Observation: For each module, most student has multiple interactions with the VLE. Module FFF has the most # of average clicks. Module DDD has the least # of average clicks </p>
 
-# In[108]:
+# In[123]:
 
 df_mergedInfoRegVle = pd.merge(df_mergedInfoReg, df_studentVle, 
                                how="left", left_on=['code_module','code_presentation', "id_student"],
@@ -130,7 +130,7 @@ df_mergedInfoRegVle = pd.merge(df_mergedInfoReg, df_studentVle,
 df_mergedInfoRegVle.head()
 
 
-# In[109]:
+# In[124]:
 
 print(df_mergedInfoRegVle.groupby(['code_module','code_presentation','id_student']).id_student.count()[0:10])
 df_mergedInfoRegVle.groupby(['code_module','code_presentation']
@@ -140,7 +140,22 @@ df_mergedInfoRegVle.groupby(['code_module','code_presentation']
 
 # <h3> 4. Adding the attribute "completion" to the merged data frame</h3>
 
-# In[110]:
+# <h5> Removing the records that have inconsistent information for "final_result" and "date_unregistration"</h5>
+
+# In[125]:
+
+noise1 = df_mergedInfoReg[df_mergedInfoReg['date_unregistration'].notnull()&(df_mergedInfoReg['final_result']!='Withdrawn')]
+noise2 = df_mergedInfoReg[(df_mergedInfoReg['date_unregistration'].isnull())&(df_mergedInfoReg['final_result']=='Withdrawn')]
+noise2
+
+
+# In[126]:
+
+df_mergedInfoReg = df_mergedInfoReg.drop(noise1.index)
+df_mergedInfoReg = df_mergedInfoReg.drop(noise2.index)
+
+
+# In[127]:
 
 df_mergedInfoReg['completion'] = np.isnan(df_mergedInfoReg['date_unregistration'])
 df_mergedInfoReg.head()
@@ -149,7 +164,7 @@ df_mergedInfoReg.head()
 # <h3>5. Select one particular code_module and code_presentation</h3>
 # 
 
-# In[111]:
+# In[128]:
 
 get_ipython().magic('matplotlib inline')
 fig, axs = plt.subplots(2,2, figsize=[20,20])
@@ -166,21 +181,22 @@ AGp_all.get_group(presentation).groupby('completion').size().plot.pie(title="Mod
         shadow=True,fontsize=15)
 
 
-# In[112]:
+# In[129]:
 
 AGp_pr = AGp_all.get_group(presentation)
 AGp_pr.head()
 
 
-# In[113]:
+# In[130]:
 
 # #saving to file
-# AGp_pr.to_csv('Module_presentation.csv')
+# AGp_prReplace = AGp_pr.fillna(500)
+# AGp_prReplace.to_csv('Module_presentation_removeNoise.csv')
 
 
 # <h3>6. Visualising variable association -- mosaic plot </h3>
 
-# In[114]:
+# In[131]:
 
 get_ipython().magic('matplotlib inline')
 from statsmodels.graphics.mosaicplot import mosaic
@@ -197,7 +213,7 @@ fig, axs = plt.subplots(4,2, figsize=[16,32])
 
 # <h3>7. Calculating categorical variable pair-wise correlation </h3>
 
-# In[115]:
+# In[132]:
 
 from sklearn.preprocessing import LabelEncoder
 lb_make = LabelEncoder()
@@ -226,4 +242,11 @@ fig = plt.figure(figsize=[20,8])
 plt.bar(range(len(correlation)), correlation.values(), align='center')
 a=plt.xticks(range(len(correlation)), correlation.keys())
 plt.grid()
+
+
+# In[133]:
+
+get_ipython().magic('matplotlib inline')
+AGp_prReplace = AGp_pr.fillna(500)
+AGp_prReplace.plot(kind="scatter",x="date_unregistration", y="date_registration",figsize=[15,8],grid=True,title="Relationship between date_unregistration and date_registration")
 
